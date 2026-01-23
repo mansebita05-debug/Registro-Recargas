@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de ventas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        input, select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+            font-size: 16px; /* Para mejor usabilidad en móviles */
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        @media (max-width: 600px) {
+            table {
+                font-size: 14px;
+            }
+            th, td {
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista de ventas</h1>
+    <table id="ventasTable">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Cantidad (USD)</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Las filas se agregarán dinámicamente -->
+        </tbody>
+    </table>
+    <button onclick="agregarFila()">Agregar fila</button>
+    <button onclick="guardarDatos()">Guardar</button>
+    <button onclick="cargarDatos()">Cargar</button>
+    <button onclick="limpiarDatos()">Limpiar todo</button>
+
+    <script>
+        // Función para agregar una nueva fila
+        function agregarFila() {
+            const tbody = document.querySelector('#ventasTable tbody');
+            const nuevaFila = document.createElement('tr');
+            nuevaFila.innerHTML = `
+                <td><input type="text" placeholder="Ingrese el nombre"></td>
+                <td><input type="number" placeholder="Ingrese la cantidad en USD" min="0" step="0.01"></td>
+                <td><input type="date"></td>
+                <td>
+                    <select>
+                        <option value="debe">Debe</option>
+                        <option value="pagado">Pagado</option>
+                    </select>
+                </td>
+            `;
+            tbody.appendChild(nuevaFila);
+        }
+
+        // Función para guardar los datos en localStorage
+        function guardarDatos() {
+            const filas = document.querySelectorAll('#ventasTable tbody tr');
+            const datos = [];
+            filas.forEach(fila => {
+                const celdas = fila.querySelectorAll('input, select');
+                const filaData = {
+                    nombre: celdas[0].value,
+                    cantidad: celdas[1].value,
+                    fecha: celdas[2].value,
+                    estado: celdas[3].value
+                };
+                datos.push(filaData);
+            });
+            localStorage.setItem('listaVentas', JSON.stringify(datos));
+            alert('Datos guardados exitosamente.');
+        }
+
+        // Función para cargar los datos desde localStorage
+        function cargarDatos() {
+            const datos = JSON.parse(localStorage.getItem('listaVentas')) || [];
+            const tbody = document.querySelector('#ventasTable tbody');
+            tbody.innerHTML = ''; // Limpiar tabla
+            datos.forEach(dato => {
+                const nuevaFila = document.createElement('tr');
+                nuevaFila.innerHTML = `
+                    <td><input type="text" value="${dato.nombre}" placeholder="Ingrese el nombre"></td>
+                    <td><input type="number" value="${dato.cantidad}" placeholder="Ingrese la cantidad en USD" min="0" step="0.01"></td>
+                    <td><input type="date" value="${dato.fecha}"></td>
+                    <td>
+                        <select>
+                            <option value="debe" ${dato.estado === 'debe' ? 'selected' : ''}>Debe</option>
+                            <option value="pagado" ${dato.estado === 'pagado' ? 'selected' : ''}>Pagado</option>
+                        </select>
+                    </td>
+                `;
+                tbody.appendChild(nuevaFila);
+            });
+            alert('Datos cargados exitosamente.');
+        }
+
+        // Función para limpiar todos los datos
+        function limpiarDatos() {
+            if (confirm('¿Estás seguro de que quieres limpiar todos los datos?')) {
+                localStorage.removeItem('listaVentas');
+                document.querySelector('#ventasTable tbody').innerHTML = '';
+                alert('Datos limpiados.');
+            }
+        }
+
+        // Cargar datos automáticamente al cargar la página
+        window.onload = cargarDatos;
+    </script>
+</body>
+</html>
